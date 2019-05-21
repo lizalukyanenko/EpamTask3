@@ -3,16 +3,20 @@ package com.epam;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 
-public class Operator{
+public class Operator {
     private Lock lock;
     private Queue<Customer> customerQueue;
     private int quantityCustomer;
 
-    public void serveCustomer (Customer customer) {
-        while ( (customer != null) && (this.quantityCustomer > 0) ) {
+    public Operator(int quantityCustomer) {
+        this.quantityCustomer = quantityCustomer;
+    }
+
+    public void serveCustomer(Customer customer) {
+        while ((customer != null) && (this.quantityCustomer > 0)) {
             try {
                 Thread.sleep(customer.getTalkTime());
-                System.out.println("Customer " + customer.getNumber() + " served");
+                Main.LOG.info("Customer #" + customer.getNumber() + " served");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -21,24 +25,32 @@ public class Operator{
             if (this.quantityCustomer > 0) {
                 customer = this.customerQueue.poll();
                 if (customer != null) {
-                    System.out.println("Operator pulled customer " + customer.getNumber());
+                    Main.LOG.info("Operator pulled customer #" + customer.getNumber());
                 }
             }
         }
-        if ( (customer == null) && (this.quantityCustomer > 0) ) {
+        if ((customer == null) && (this.quantityCustomer > 0)) {
             lock.unlock();
         }
     }
 
-    public Operator (int quantityCustomer) {
-        this.quantityCustomer = quantityCustomer;
+    public int getQuantityCustomer() {
+        return quantityCustomer;
     }
 
-    public void setLock (Lock lock) {
+    public void setLock(Lock lock) {
         this.lock = lock;
     }
 
-    public void setCustomerQueue (Queue<Customer> queue) {
+    public Lock getLock () {
+        return lock;
+    }
+
+    public void setCustomerQueue(Queue<Customer> queue) {
         this.customerQueue = queue;
+    }
+
+    public Queue<Customer> getCustomerQueue() {
+        return customerQueue;
     }
 }

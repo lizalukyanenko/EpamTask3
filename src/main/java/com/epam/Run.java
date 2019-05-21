@@ -3,10 +3,10 @@ package com.epam;
 import java.util.Random;
 
 public class Run {
-    private static Run ourInstance = new Run();
+    private static Run instance = new Run();
 
     public static Run getInstance() {
-        return ourInstance;
+        return instance;
     }
 
     private Run() {
@@ -17,7 +17,7 @@ public class Run {
         for (int i = 0; i < 20; i++) {
             Customer customer = new Customer(new Random().nextBoolean());
             callCenter.serveCustomer(customer);
-            System.out.println("Customer " + customer.getNumber() + " enter to CallCenter");
+            Main.LOG.info("Customer #" + customer.getNumber() + " call to CallCenter");
         }
         try {
             Thread.sleep(5000);

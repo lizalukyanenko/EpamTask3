@@ -31,16 +31,28 @@ public class CallCenter {
 
     }
 
+    public void serveCustomer(Customer customer) {
+        customer.setNumber(count.incrementAndGet());
+        service.submit(() -> process(customer));
+    }
+
+    public ExecutorService getService() {
+        return service;
+    }
+
+    public ScheduledExecutorService getTimeToLeave() {
+        return timeToLeave;
+    }
+
+    public Queue<Customer> getCall() {
+        return call;
+    }
+
     private Line initializeLine() {
         Operator operator = new Operator(10 + new Random().nextInt(5));
         Line line = new Line(operator);
         operator.setCustomerQueue(this.call);
         return line;
-    }
-
-    public void serveCustomer(final Customer customer) {
-        customer.setNumber(count.incrementAndGet());
-        service.submit(() -> process(customer));
     }
 
     private void process(Customer customer) {
@@ -60,16 +72,16 @@ public class CallCenter {
         }
     }
 
-    private void queueCustomer(final Customer customer) {
+    private void queueCustomer(Customer customer) {
         boolean isAdded = false;
         try {
             isAdded = this.call.add(customer);
         } catch (Exception ex) {
-            System.out.println("Customer " + customer.getNumber() + " go away NOT serve - queue fulled");
+            Main.LOG.info("Customer #" + customer.getNumber() + " go away NOT serve - queue fulled!");
         }
         if (isAdded) {
             timeToLeave.schedule(() -> leaveQueue(customer), 2 + new Random().nextInt(1), TimeUnit.SECONDS);
-            System.out.println("Customer " + customer.getNumber() + " add to queue");
+            Main.LOG.info("Customer #" + customer.getNumber() + " add to queue");
         }
     }
 
@@ -77,7 +89,7 @@ public class CallCenter {
         lock.lock();
         if(call.contains(customer)){
             call.remove(customer);
-            System.out.println("Customer " + customer.getNumber() + " go away NOT serve - time over!");
+            Main.LOG.info("Customer #" + customer.getNumber() + " go away NOT serve - time over!");
             recall(customer);
         }
         lock.unlock();
@@ -87,16 +99,8 @@ public class CallCenter {
         boolean isWant2Recall = new Random().nextBoolean();
         if(isWant2Recall){
             if(call.add(customer)){
-                System.out.println("Customer " + customer.getNumber() + " want to call again");
+                Main.LOG.info("Customer #" + customer.getNumber() + " want to call again");
             }
         }
-    }
-
-    public ExecutorService getService() {
-        return service;
-    }
-
-    public ScheduledExecutorService getTimeToLeave() {
-        return timeToLeave;
     }
 }
